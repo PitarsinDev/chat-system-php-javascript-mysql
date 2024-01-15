@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <style>
+        *{
+            font-family: 'Poppins', sans-serif;
+        }
+        .chat-load{
+            text-align: start;
+            padding-bottom: 10px;
+            color: #457b9d;
+        }
+    </style>
+</head>
+<body>
+    <div class="flex justify-center">
+        <div class="p-10">
+            <h1 class="text-orange-500 text-3xl text-center">Chat <span class="text-blue-500">System</span></h1>
+            <div class="bg-blue-500 w-5 h-1 rounded-full"></div>
+        </div>
+    </div>
+    <div class="flex justify-center pt-10">
+        <div id="chat-box" class="h-40 overflow-y-auto"></div>
+    </div>
+    <div class="flex justify-center">
+        <div class="flex gap-4">
+            <input type="text" id="message-input" placeholder="Type your message..." class="text-xs border rounded-full pl-2">
+            <button onclick="sendMessage()" class="text-blue-500 bg-blue-200 px-5 rounded-full">Send</button>
+        </div>
+    </div>
+
+    <footer class="pt-10">
+        <h1 class="text-blue-500 text-center text-xs">
+            Nomads <span class="text-orange-500">Developer</span>
+        </h1>
+    </footer>
+
+    <script>
+        function updateChatBox() {
+            const chatBox = document.getElementById("chat-box");
+
+            fetch("get_messages.php")
+                .then(response => response.json())
+                .then(messages => {
+                    chatBox.innerHTML = "";
+                    messages.forEach(message => {
+                        const p = document.createElement("p");
+                        p.classList.add("chat-load");
+                        p.textContent = message.message;
+                        chatBox.appendChild(p);
+                    });
+
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                });
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById("message-input");
+            const message = messageInput.value;
+
+            if (message.trim() !== "") {
+                fetch("send_message.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ message })
+                })
+                .then(() => {
+                    messageInput.value = "";
+                    updateChatBox();
+                });
+            }
+        }
+
+        setInterval(updateChatBox, 2000);
+
+        updateChatBox();
+    </script>
+</body>
+</html>
